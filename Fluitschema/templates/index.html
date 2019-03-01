@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <form action="/" method="post">
+        <select name="weeks">
+            {% for day in weeks %}
+                <option value= {{day[0]}}>
+                    {{day[0]}}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Show me the table!</button>
+    </form>
+    
+<br />
+    {{data[0][0]}}
+
+    <table style="width: 640px">
+        <tr id="t03">
+            <th id="t03">Time</th>
+            <th id="t03">Game</th>
+            <th id="t03">Tables</th>
+            <th id="t03">Zaalco</th>
+            <th id="t03">Referees</th>
+        </tr>
+        {% for i in range(length) %}
+            <tr id={{new_ls[i]}}>
+                    <td id="t01">{{data[i][1]}}</td>
+                    <td id="t04">{{data[i][2]}} - {{data[i][3]}}</td>
+                    <td id="t05">{{tables[i]}}</td>
+                    <td id="t05">{{zaalcos[i]}}</td>
+                    <td id="t05">{{referees[i]}}</td>
+            </tr>
+        {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,26 @@
+﻿{% extends "layout.html" %}
+
+{% block title %}
+    Change
+{% endblock %}
+
+{% block main %}
+<form action="/change" method="post" enctype="multipart/form-data">
+    1. Download old schedule
+    <div>
+        <button class="btn btn-primary" type="submit" name="schedule" value="schedule">Download schedule </button>
+    </div>
+    </form>
+    <br />
+    <br />
+<form action="/change" method="post" enctype="multipart/form-data">
+
+    2. Upload updated schedule
+    <div>
+        <input type="file" id="file" name="update" value="update">
+    </div>
+    <br />
+    <br />
+    <button class="btn btn-primary" type="submit" name="update" value="update">Update schedule! </button>
+</form>
+{% endblock %}

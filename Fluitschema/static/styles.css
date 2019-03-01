@@ -1,0 +1,107 @@
+nav .navbar-brand
+{
+    /* size for brand */
+    font-size: xx-large;
+}
+
+/* colors for brand */
+nav .navbar-brand .blue
+{
+    color: #537fbe;
+}
+nav .navbar-brand .red
+{
+    color: #ea433b;
+}
+nav .navbar-brand .yellow
+{
+    color: #f5b82e;
+}
+nav .navbar-brand .green
+{
+    color: #2e944b;
+}
+
+main .form-control
+{
+    /* center form controls */
+    display: inline-block;
+
+    /* override Bootstrap's 100% width for form controls */
+    width: auto;
+}
+
+main
+{
+    /* scroll horizontally as needed */
+    overflow-x: auto;
+
+    /* center contents */
+    text-align: center;
+
+}
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+
+th
+{
+    height: 15px;
+    border: 1px solid LimeGreen;
+}
+
+td
+{
+    vertical-align: top;
+    text-align: left;
+    height: 15px;
+    border: 1px solid #A8D08D;
+}
+#t01
+{
+    width: 90px;
+    font-weight: bold;
+    color: black;
+}
+#t02
+{
+    font-size: 12px;
+    border-collapse: collapse;
+    background-color: White;
+}
+#t03
+{
+    font-size: 12px;
+    border: 1px hidden;
+    border-collapse: collapse;
+    background-color: #70AD47;
+    color:Black;
+}
+#t04
+{
+    width: 250px;
+}
+#t05
+{
+    width: 100px;
+}
+#t06
+{
+    font-size: 12px;
+    border-collapse: collapse;
+    background-color: White;
+}
+#t07
+{
+    font-size: 12px;
+    border-collapse: collapse;
+    background-color: #E2EFD9;
+}
+
+body
+{
+    background-color: Azure;
+}

@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New
+{% endblock %}
+
+{% block main %}
+<form action="/new" method="post" enctype="multipart/form-data">
+    <b>Insert Congressus file with only the "wedstrijdspelers".</b>
+    <div>
+        <input type="file" id="file" name="file">
+    </div>
+    <br />
+    <b>Insert Game Schedule</b>
+    <div>
+        <input type="file" id="file2" name="file2">
+    </div>
+    <br />
+    <br />
+    <button class="btn btn-primary" type="submit">Create table! </button>
+</form>
+{% endblock %}

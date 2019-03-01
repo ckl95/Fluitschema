@@ -1,0 +1,18 @@
+﻿{% extends "layout.html" %}
+
+{% block title %}
+    Delete
+{% endblock %}
+
+{% block main %}
+    <form action="/" method="post">
+        <select name="dates">
+            {% for high in dates %}
+                <option value= {{high[0]}}>
+                    {{high[0]}}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Delete it now!</button>
+    </form>
+{% endblock %}

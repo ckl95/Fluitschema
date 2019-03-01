@@ -1,0 +1,373 @@
+from flask import flash, redirect, render_template, request, session, abort, send_file
+from flask_session import Session
+from tempfile import mkdtemp
+from werkzeug.exceptions import default_exceptions
+from werkzeug.security import check_password_hash, generate_password_hash
+from Fluitschema.helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
+from Fluitschema import app
+import os, sys
+import sqlite3
+import numpy as np
+import pandas as pd
+
+sqlite3.register_adapter(np.int64, lambda val: int(val))
+sqlite3.register_adapter(np.int32, lambda val: int(val))
+
+# Some assets of the program are 'borrowed' from the cs50 problem set 7.
+# For instance the function 'login_required' and the flask settings.
+
+# Ensure templates are auto-reloaded
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+
+@app.after_request
+# Ensure responses aren't cached
+def after_request(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
+
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_FILE_DIR"] = mkdtemp()
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
+# Configure CS50 Library to use SQLite database
+conn = sqlite3.connect("project.db")
+
+@app.route("/change", methods=["GET", "POST"])
+@login_required
+def change():
+
+    username = get_username()
+    if request.method == "POST" and "schedule" in request.form:
+
+        # Retrieve the sql tables from the current user
+        df_schedule = DutyTable("sql")
+        
+        writer = pd.ExcelWriter("schedule_{}.xlsx".format(session["user_id"]), engine='xlsxwriter')
+        df_schedule.df_duty_table.to_excel(writer, sheet_name="schedule", index=False)
+        writer.save()
+        
+        return send_file(os.path.join(sys.path[0], "schedule_{}.xlsx".format(session["user_id"])), as_attachment=True, attachment_filename='schedule.xlsx')
+    
+    elif request.method == "POST" and "update" in request.form:
+
+        # if file is missing
+        if 'update' not in request.files:
+            abort(400, "Missing File")
+        file = request.files["update"]
+
+        # prepares the new duty table
+        df_schedule_updated = pd.read_excel(file, sheet_name=0) # turn the excel sheet into pandas dataframe
+        df_schedule_updated = df_schedule_updated.dropna(how = "all").reset_index().drop(columns = "index") # delete empty rows
+        df_schedule_updated["username"] = username[0] # make sure username = current username
+
+        # deletes former schedule
+        db = conn.cursor()
+        db.execute("DELETE FROM schedule WHERE username=:username", {"username": username[0]})
+            
+        # adds current updated schedule
+        df_schedule_updated.to_sql("schedule", conn, if_exists='append', index=False)
+        db.close()
+
+        return redirect("/", code=302)
+
+    else:
+        return render_template("change.html")   
+
+
+@app.route("/delete", methods=["GET", "POST"])
+@login_required
+def delete():
+
+    username = get_username()
+    db = conn.cursor()
+    c_2 = db.execute("SELECT day FROM schedule where username=:username GROUP BY day", {"username": username[0]})
+    dates = c_2.fetchall()
+    db.close()
+    if request.method == "POST":
+        
+        # When a week is not selected
+        if not request.form.get("dates"):
+            return abort(400, "must select date")
+
+        df_scheme = pd.read_sql("""SELECT day, team, tables, zaalco, referees FROM
+                                schedule WHERE username = :username""",
+                                conn, params={"username": username[0]})
+
+    else:
+        return render_template("delete.html", dates=dates)    
+
+
+@app.route("/download")
+@login_required
+def download():
+
+    # Create the dataframe containing the teams and the players
+    df_teams_table = TeamsTable("duty_table")
+  
+    # Create the tables that are to be exported
+    df_players = df_teams_table.create_playerduties_table()
+    df_teams = df_teams_table.create_teamduties_table()
+    
+    print(session["user_id"])
+    # write to an excel file
+    writer = pd.ExcelWriter("output{}.xlsx".format(session["user_id"]), engine='xlsxwriter')
+    df_players.to_excel(writer, sheet_name="players", index=False)
+    df_teams.to_excel(writer, sheet_name="teams", index=False)
+    writer.save()
+    return send_file(os.path.join(sys.path[0], "output{}.xlsx".format(session["user_id"])), as_attachment=True, attachment_filename='duties.xlsx')
+
+
+@app.route("/", methods=["GET", "POST"])
+@login_required
+def index():
+    
+    username = get_username()
+    db = conn.cursor()
+    c_2 = db.execute("SELECT day FROM schedule where username=:username GROUP BY day", {"username": username[0]})
+    weeks = c_2.fetchall()
+    db.close()
+    data = [[]]
+    new_ls = ["t06"]
+
+    if request.method == "POST":
+
+        # When a week is not selected
+        if not request.form.get("weeks"):
+            return abort(400, "must select week")
+
+        db = conn.cursor()
+        c = db.execute("""SELECT day, time, hometeam, awayteam, table1, table2, table3,
+                        zaalco, referee1, referee2 FROM schedule WHERE
+                       day=:day AND username=:username""", {"day": request.form.get("weeks"), "username": username[0]})
+        data = c.fetchall()
+        db.close()
+
+        # Formatting the zaalco duty data
+        zaalcos = []
+        for game in data:
+            if game[7] == None:
+                zaalcos.append("")
+            else:
+                zaalcos.append(game[7])
+
+        # Formatting the table duty data
+        tables = []
+        for game in data:
+            table_string = ""
+            for i in range(4,7):
+                if game[i] != None:
+                    table_string = table_string + game[i] + ", "
+                
+            table_sting = table_string.replace(", , ", ", ")
+            if table_string[-2:] == ", ":
+                table_string = table_string[:-2]
+            if table_string[:2] == ", ":
+                table_string = table_string[2:]
+            tables.append(table_string)
+
+        # Formatting the referees
+        referees = []
+        for game in data:
+            referee_string = ""
+            for i in range(8,10):
+                if game[i] != None:
+                    referee_string = referee_string + game[i] + ", "
+            if referee_string[-2:] == ", ":
+                referee_string = referee_string[:-2]
+            if referee_string[:2] == ", ":
+                referee_string = referee_string[2:]
+            referees.append(referee_string)
+
+        # Getting the right css id
+        a = 6
+        for i in range(len(data) - 1):
+            if data[i + 1][1] == data[i][1]:
+                b = "t0" + str(a)
+                new_ls.append(b)
+            else:
+                if a == 6:
+                    a += 1
+                elif a == 7:
+                    a = a - 1
+                b = "t0" + str(a)
+                new_ls.append(b)
+        return render_template("index.html", weeks=weeks, tables=tables, referees=referees, zaalcos=zaalcos, data=data, length=len(data), new_ls=new_ls)
+    else:
+        return render_template("index.html", weeks=weeks, data=data, length=0)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            flash("Missing Username")
+            return redirect("/login")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            flash("Missing Password")
+            return redirect("/login")
+
+        db = conn.cursor()
+        # Query database for username
+        c = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")})
+        rows = c.fetchone()
+        db.close()
+
+        # Ensure username exists and password is correct
+        if len(rows) != 3 or not check_password_hash(rows[2], request.form.get("password")):
+            flash("Username or password is incorrect")
+            return redirect("/login")
+
+        # Remember which user has logged in
+        session["user_id"] = rows[0]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
+
+
+@app.route("/new", methods=["GET", "POST"])
+@login_required
+def new():
+    """ adds an file to the server"""
+
+    if request.method == "POST":
+
+        # Read files
+        if 'file' not in request.files:
+            abort(400, "missing file")
+        game_members = request.files["file"]
+
+        if 'file2' not in request.files:
+            abort(400, "missing file")
+        game_schedule = request.files["file2"]
+
+        # Creates TeamsTable from file
+        df_game_members = pd.read_excel(game_members, sheet_name=0) # Turns the congressus file into a dataframe
+        df_teams = TeamsTable("congressus", df_game_members) 
+
+        # Prepares the gameschedule
+        df_game_schedule = pd.read_excel(game_schedule, sheet_name=0) # Turns game schedule into a pandas dataframe                
+        df_game_schedule = GameSchedule.delete_away_games(df_game_schedule)        
+        df_game_schedule = GameSchedule.change_time_format(df_game_schedule)
+
+        # Creates the table and referees amount dataframe.
+        df_duty_amounts = create_duty_amounts()   
+
+        # Creates the duty table
+        duty_table = DutyTable("scratch", df_game_schedule, df_teams.df_teams_table, df_duty_amounts) 
+        duty_table.to_sql() # Puts the duty table into SQL
+
+        return redirect("/", code=302)
+
+    else:
+        return render_template("new.html")
+
+
+@app.route("/read_me")
+@login_required
+def read_me():
+    """ sends an readme.text to the client."""
+
+    return send_file("ReadMe.txt", as_attachment=True, attachment_filename='ReadMe.txt')
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return abort(400)
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return abort(400)
+
+        # Ensure confirmation was submitted
+        elif not request.form.get("confirmation"):
+            return abort(400)
+
+        # Ensure password matches the confirmation
+        elif request.form.get("confirmation") != request.form.get("password"):
+            return abort(400)
+
+        # Makes an hash out of the password
+        hash = generate_password_hash(request.form.get("password"))
+
+        db = conn.cursor()
+        # Insert user into users table and ensure the username doesn't exist already
+        result = db.execute("INSERT INTO users(username, hash) VALUES(:username, :hash)",
+                            {"username": request.form.get("username"), "hash": hash})
+        if not result:
+            return abort(400, "username already exists")
+
+        # Save SQL table
+        conn.commit()
+
+        # Query database for username
+        c = db.execute("SELECT * FROM users WHERE username = :username",
+                       {"username": request.form.get("username")})
+
+        rows = c.fetchone()
+        db.close()
+        # Remember which user has logged in
+        session["user_id"] = rows[0]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("register.html")
+
+
+@app.route("/test")
+def test():
+    """Just testing"""
+
+    username = get_username()
+
+    df_schedule = pd.read_sql("""SELECT username, day, time, hometeam, awayteam, table1, team_table1, table2, team_table2, table3, team_table3,
+                            zaalco, team_zaalco, referee1, team_referee1, referee2, team_referee2 FROM
+                         schedule WHERE username = :username""",
+                          conn, params={"username": username[0]})
+
+
+    df2 = df_schedule[df_schedule["day"] == "2018-11-24"]
+    print(df2)
+    print(df_schedule.isin(["Jorn Froen"]).any(axis=None))
+
+    return redirect("/", code=302)
