@@ -1,1 +1,1 @@
-web: gunicorn Fluitschema.__init__:app --log-file -
+web: gunicorn Fluitschema.application:app --log-file -

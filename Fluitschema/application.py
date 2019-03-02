@@ -1,10 +1,9 @@
-from flask import flash, redirect, render_template, request, session, abort, send_file
+from flask import flash, redirect, render_template, request, session, abort, send_file, Flask
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 from Fluitschema.helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
-from Fluitschema import app
 import os, sys
 import sqlite3
 import numpy as np
@@ -15,6 +14,11 @@ sqlite3.register_adapter(np.int32, lambda val: int(val))
 
 # Some assets of the program are 'borrowed' from the cs50 problem set 7.
 # For instance the function 'login_required' and the flask settings.
+
+
+# The flask application pacakage
+
+app = Flask(__name__)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
