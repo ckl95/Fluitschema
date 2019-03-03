@@ -8,6 +8,7 @@ import os, sys
 import sqlite3
 import numpy as np
 import pandas as pd
+from io import BytesIO
 
 sqlite3.register_adapter(np.int64, lambda val: int(val))
 sqlite3.register_adapter(np.int32, lambda val: int(val))
@@ -51,12 +52,14 @@ def change():
 
         # Retrieve the sql tables from the current user
         df_schedule = DutyTable("sql")
-        
-        writer = pd.ExcelWriter("schedule_{}.xlsx".format(session["user_id"]), engine='xlsxwriter')
+
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
         df_schedule.df_duty_table.to_excel(writer, sheet_name="schedule", index=False)
-        writer.save()
+        writer.close()
+        output.seek(0)
         
-        return send_file(os.path.join(sys.path[0], "schedule_{}.xlsx".format(session["user_id"])), as_attachment=True, attachment_filename='schedule.xlsx')
+        return send_file(output, as_attachment=True, attachment_filename='schedule.xlsx')
     
     elif request.method == "POST" and "update" in request.form:
 
@@ -83,30 +86,6 @@ def change():
     else:
         return render_template("change.html")   
 
-
-@app.route("/delete", methods=["GET", "POST"])
-@login_required
-def delete():
-
-    username = get_username()
-    db = conn.cursor()
-    c_2 = db.execute("SELECT day FROM schedule where username=:username GROUP BY day", {"username": username[0]})
-    dates = c_2.fetchall()
-    db.close()
-    if request.method == "POST":
-        
-        # When a week is not selected
-        if not request.form.get("dates"):
-            return abort(400, "must select date")
-
-        df_scheme = pd.read_sql("""SELECT day, team, tables, zaalco, referees FROM
-                                schedule WHERE username = :username""",
-                                conn, params={"username": username[0]})
-
-    else:
-        return render_template("delete.html", dates=dates)    
-
-
 @app.route("/download")
 @login_required
 def download():
@@ -118,13 +97,17 @@ def download():
     df_players = df_teams_table.create_playerduties_table()
     df_teams = df_teams_table.create_teamduties_table()
     
-    print(session["user_id"])
     # write to an excel file
-    writer = pd.ExcelWriter("output{}.xlsx".format(session["user_id"]), engine='xlsxwriter')
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    
     df_players.to_excel(writer, sheet_name="players", index=False)
     df_teams.to_excel(writer, sheet_name="teams", index=False)
-    writer.save()
-    return send_file(os.path.join(sys.path[0], "output{}.xlsx".format(session["user_id"])), as_attachment=True, attachment_filename='duties.xlsx')
+
+    writer.close()
+    output.seek(0)
+    
+    return send_file(output, as_attachment=True, attachment_filename='duties.xlsx')
 
 
 @app.route("/", methods=["GET", "POST"])
