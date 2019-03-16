@@ -26,8 +26,8 @@ class users(database.Model):
 class schedule(database.Model):
     __tablename__ = "schedule"
     username = database.Column(database.Text, nullable=False, primary_key = True)
-    day = database.Column(database.Text, nullable=False, primary_key = True)
-    time = database.Column(database.Text, nullable=False, primary_key = True)
+    days = database.Column(database.Text, nullable=False, primary_key = True)
+    times = database.Column(database.Text, nullable=False, primary_key = True)
     hometeam = database.Column(database.Text, nullable=False, primary_key = True)
     awayteam = database.Column(database.Text, nullable=False, primary_key = True)
     table1 = database.Column(database.Text)

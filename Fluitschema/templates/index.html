@@ -17,7 +17,7 @@
     </form>
     
 <br />
-    {{data[0].day}}
+    {{data[0].days}}
 
     <table style="width: 640px">
         <tr id="t03">
@@ -29,7 +29,7 @@
         </tr>
         {% for i in range(length) %}
             <tr id={{new_ls[i]}}>
-                    <td id="t01">{{data[i].time}}</td>
+                    <td id="t01">{{data[i].times}}</td>
                     <td id="t04">{{data[i].hometeam}} - {{data[i].awayteam}}</td>
                     <td id="t05">{{tables[i]}}</td>
                     <td id="t05">{{zaalcos[i]}}</td>
