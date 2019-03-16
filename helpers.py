@@ -300,7 +300,7 @@ class DutyTable:
 
 
     def __create_duty_table(self):
-        data = {"username":[],"day":[],"time":[],"hometeam":[],"awayteam":[],"table1":[],
+        data = {"username":[],"days":[],"times":[],"hometeam":[],"awayteam":[],"table1":[],
             "team_table1":[],"table2":[],"team_table2":[],"table3":[],"team_table3":[],
             "zaalco":[],"team_zaalco":[],"referee1":[],"team_referee1":[],"referee2":[],
             "team_referee2":[]}
@@ -328,8 +328,8 @@ class DutyTable:
         username = get_username()
         for index, row in self.__schedule.iterrows():
             self.df_duty_table.loc[index + self.__last_row, "username"] = username
-            self.df_duty_table.loc[index + self.__last_row, "day"] = row["Datum"]
-            self.df_duty_table.loc[index + self.__last_row, "time"] = row["Tijd"]
+            self.df_duty_table.loc[index + self.__last_row, "days"] = row["Datum"]
+            self.df_duty_table.loc[index + self.__last_row, "times"] = row["Tijd"]
             self.df_duty_table.loc[index + self.__last_row, "hometeam"] = row["Thuisteam"]
             self.df_duty_table.loc[index + self.__last_row, "awayteam"] = row["Uitteam"]
         return
@@ -459,7 +459,7 @@ class DutyTable:
         for player in player_list:
 
             # check if player in table
-            df_day = self.df_duty_table[self.df_duty_table["day"] == self.__day]
+            df_day = self.df_duty_table[self.df_duty_table["days"] == self.__day]
             player_in_list = df_day.isin([player]).any(axis=None)
 
             # If player not in dutytable, select it.
