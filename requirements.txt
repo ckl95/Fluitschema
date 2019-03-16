@@ -1,5 +1,6 @@
 Flask
 Flask-Session
+Flask-SQLAlchemy
 gunicorn
 pandas
 numpy
