@@ -147,7 +147,10 @@ def download():
 def index():
 
     username = get_username()
-    c_2 = schedule.query.filter_by(username=username).group_by(schedule.days).all()
+    try:
+        c_2 = schedule.query.filter_by(username=username).group_by(schedule.days).all()
+    except psycopg2.ProgrammingError:
+        c_2 = []
     weeks = []
     for week in c_2:
         weeks.append(week.day)
