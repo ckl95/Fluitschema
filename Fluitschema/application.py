@@ -237,11 +237,13 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
+            print("Missing username")
             flash("Missing Username")
             return redirect("/login")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
+            print("Missing password")
             flash("Missing Password")
             return redirect("/login")
 
@@ -252,10 +254,12 @@ def login():
         try:
             check_password_hash(rows.hash, request.form.get("password"))
         except AttributeError:
+            print("Username and or password are incorrect")
             flash("Username or password is incorrect")
             return redirect("/login")
 
         # Remember which user has logged in
+        print(rows.id)
         session["user_id"] = rows.id
 
         # Redirect user to home page
