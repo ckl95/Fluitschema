@@ -1,4 +1,4 @@
-from flask import redirect, session, abort, flash
+from flask import redirect, session, abort, flash, Flask
 from functools import wraps, reduce
 import operator
 import sqlite3
