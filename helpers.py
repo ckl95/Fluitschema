@@ -16,37 +16,7 @@ import pandas as pd
 #app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b06747de32826f75925a2edb7406b343fcdedd774bb04aec262adf5c@ec2-23-21-165-188.compute-1.amazonaws.com:5432/dkgb8euqaflh"
 #database = SQLAlchemy(app)
 
-class users(database.Model):
-    id = database.Column(database.Integer, primary_key = True)
-    username = database.Column(database.Text, unique=True, nullable=False)
-    hash = database.Column(database.Text, nullable=False)
-
-    def __repr__(self):
-        return "<users %r>" % self.username
-
-class schedule(database.Model):
-    __tablename__ = "schedule"
-    username = database.Column(database.Text, nullable=False, primary_key = True)
-    days = database.Column(database.Text, nullable=False, primary_key = True)
-    times = database.Column(database.Text, nullable=False, primary_key = True)
-    hometeam = database.Column(database.Text, nullable=False, primary_key = True)
-    awayteam = database.Column(database.Text, nullable=False, primary_key = True)
-    table1 = database.Column(database.Text)
-    team_table1 = database.Column(database.Text)
-    table2 = database.Column(database.Text)
-    team_table2 = database.Column(database.Text)
-    table3 = database.Column(database.Text)
-    team_table3 = database.Column(database.Text)
-    zaalco = database.Column(database.Text)
-    team_zaalco = database.Column(database.Text)
-    referee1 = database.Column(database.Text)
-    team_referee1 = database.Column(database.Text)
-    referee2 = database.Column(database.Text)
-    team_referee2 = database.Column(database.Text)
-
-database.create_all()
-
-
+from models import users, schedule
 
 def login_required(f):
     """
