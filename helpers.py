@@ -1,6 +1,6 @@
 from flask import redirect, session, abort, flash, Flask
 from functools import wraps, reduce
-from application import app
+from application import database
 import operator
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
@@ -13,8 +13,8 @@ import pandas as pd
 #app = Flask(__name__)
 
 # connect SQLite to project.db
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b06747de32826f75925a2edb7406b343fcdedd774bb04aec262adf5c@ec2-23-21-165-188.compute-1.amazonaws.com:5432/dkgb8euqaflh"
-database = SQLAlchemy(app)
+#app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b06747de32826f75925a2edb7406b343fcdedd774bb04aec262adf5c@ec2-23-21-165-188.compute-1.amazonaws.com:5432/dkgb8euqaflh"
+#database = SQLAlchemy(app)
 
 class users(database.Model):
     id = database.Column(database.Integer, primary_key = True)
