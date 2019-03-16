@@ -129,7 +129,7 @@ def index():
     #    c_2 = []
     weeks = []
     for week in c_2:
-        weeks.append(week.day)
+        weeks.append(week.days)
 
     data = [[]]
     new_ls = ["t06"]
@@ -140,7 +140,7 @@ def index():
         if not request.form.get("weeks"):
             return abort(400, "must select week")
 
-        data = schedule.query.filter_by(username=username, day=request.form.get("weeks")).all()
+        data = schedule.query.filter_by(username=username, days=request.form.get("weeks")).all()
 
         # Formatting the zaalco duty data
         zaalcos = []
@@ -186,7 +186,7 @@ def index():
         # Getting the right css id
         a = 6
         for i in range(len(data) - 1):
-            if data[i + 1].time == data[i].time:
+            if data[i + 1].times == data[i].times:
                 b = "t0" + str(a)
                 new_ls.append(b)
             else:
@@ -356,13 +356,13 @@ def test():
 
     username = get_username()
 
-    df_schedule = pd.read_sql("""SELECT username, day, time, hometeam, awayteam, table1, team_table1, table2, team_table2, table3, team_table3,
+    df_schedule = pd.read_sql("""SELECT username, days, times, hometeam, awayteam, table1, team_table1, table2, team_table2, table3, team_table3,
                             zaalco, team_zaalco, referee1, team_referee1, referee2, team_referee2 FROM
                          schedule WHERE username = :username""",
                           conn, params={"username": username[0]})
 
 
-    df2 = df_schedule[df_schedule["day"] == "2018-11-24"]
+    df2 = df_schedule[df_schedule["days"] == "2018-11-24"]
     print(df2)
     print(df_schedule.isin(["Jorn Froen"]).any(axis=None))
 
