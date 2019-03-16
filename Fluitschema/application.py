@@ -347,7 +347,7 @@ def register():
         hash = generate_password_hash(request.form.get("password"))
 
         #insert user into users table
-        new_user = users(id = 1, username=request.form.get("username"), hash=hash)
+        new_user = users(username=request.form.get("username"), hash=hash)
         database.session.add(new_user)
 
         # Save SQL table
