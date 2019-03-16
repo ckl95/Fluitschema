@@ -1,6 +1,5 @@
 from flask import redirect, session, abort, flash
 from functools import wraps, reduce
-from Fluitschema.application import app
 import operator
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
