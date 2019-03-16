@@ -1,15 +1,49 @@
 from flask import redirect, session, abort, flash
 from functools import wraps, reduce
+from Fluitschema.application import app
 import operator
 import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 import numpy as np
 import pandas as pd
 
-sqlite3.register_adapter(np.int64, lambda val: int(val))
-sqlite3.register_adapter(np.int32, lambda val: int(val))
+#sqlite3.register_adapter(np.int64, lambda val: int(val))
+#sqlite3.register_adapter(np.int32, lambda val: int(val))
 
-# connenct SQLite to project.db
-conn = sqlite3.connect("project.db")
+# connect SQLite to project.db
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b06747de32826f75925a2edb7406b343fcdedd774bb04aec262adf5c@ec2-23-21-165-188.compute-1.amazonaws.com:5432/dkgb8euqaflh"
+database = SQLAlchemy(app)
+
+class users(database.Model):
+    id = database.Column(database.Integer, primary_key = True)
+    username = database.Column(database.Text, unique=True, nullable=False)
+    hash = database.Column(database.Text, nullable=False)
+
+    def __repr__(self):
+        return "<users %r>" % self.username
+
+class schedule(database.Model):
+    __tablename__ = "schedule"
+    username = database.Column(database.Text, nullable=False, primary_key = True)
+    day = database.Column(database.Text, nullable=False, primary_key = True)
+    time = database.Column(database.Text, nullable=False, primary_key = True)
+    hometeam = database.Column(database.Text, nullable=False, primary_key = True)
+    awayteam = database.Column(database.Text, nullable=False, primary_key = True)
+    table1 = database.Column(database.Text)
+    team_table1 = database.Column(database.Text)
+    table2 = database.Column(database.Text)
+    team_table2 = database.Column(database.Text)
+    table3 = database.Column(database.Text)
+    team_table3 = database.Column(database.Text)
+    zaalco = database.Column(database.Text)
+    team_zaalco = database.Column(database.Text)
+    referee1 = database.Column(database.Text)
+    team_referee1 = database.Column(database.Text)
+    referee2 = database.Column(database.Text)
+    team_referee2 = database.Column(database.Text)
+
+database.create_all()
+
 
 
 def login_required(f):
@@ -30,11 +64,9 @@ def get_username():
     """ Retrieve the username"""
     
     #  Import username to insert into SQL
-    db = conn.cursor()
-    c = db.execute(""" SELECT username FROM users WHERE id = :id""", {"id": session["user_id"]})
-    username = c.fetchone()
-    db.close()
-    return username
+    user = users.query.filter_by(id=session["user_id"]).first()
+
+    return user.username
 
 
 class TeamsTable:
@@ -265,11 +297,8 @@ class DutyTable:
         username = get_username()
 
         # read duty table
-        self.df_duty_table = pd.read_sql("""SELECT username, day, time, hometeam, awayteam, table1, team_table1, 
-                                        table2, team_table2, table3, team_table3, zaalco, team_zaalco, 
-                                        referee1, team_referee1, referee2, team_referee2 FROM
-                                        schedule WHERE username = :username""", conn, 
-                                        params={"username": username[0]})
+        data = schedule.query.filter_by(username=username)
+        self.df_duty_table = pd.read_sql(data.statement, data.session.bind)
 
     def from_scratch(self, df_game_schedule, df_teams_table, df3):
         
@@ -291,7 +320,7 @@ class DutyTable:
     def to_sql(self):
 
         try:
-            self.df_duty_table.to_sql("schedule", conn, if_exists='append', index=False)
+            self.df_duty_table.to_sql("schedule", database.session.bind, if_exists='append', index=False)
         except sqlite3.IntegrityError:
             flash("A game has been added twice, all changes are discarded")
         return
@@ -325,7 +354,7 @@ class DutyTable:
     def __add_game_data(self):
         username = get_username()
         for index, row in self.__schedule.iterrows():
-            self.df_duty_table.loc[index + self.__last_row, "username"] = username[0]
+            self.df_duty_table.loc[index + self.__last_row, "username"] = username
             self.df_duty_table.loc[index + self.__last_row, "day"] = row["Datum"]
             self.df_duty_table.loc[index + self.__last_row, "time"] = row["Tijd"]
             self.df_duty_table.loc[index + self.__last_row, "hometeam"] = row["Thuisteam"]

@@ -9,13 +9,7 @@ import sqlite3
 import numpy as np
 import pandas as pd
 from io import BytesIO
-
-sqlite3.register_adapter(np.int64, lambda val: int(val))
-sqlite3.register_adapter(np.int32, lambda val: int(val))
-
-# Some assets of the program are 'borrowed' from the cs50 problem set 7.
-# For instance the function 'login_required' and the flask settings.
-
+from flask_sqlalchemy import SQLAlchemy
 
 # The flask application pacakage
 
@@ -23,6 +17,42 @@ app = Flask(__name__)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b06747de32826f75925a2edb7406b343fcdedd774bb04aec262adf5c@ec2-23-21-165-188.compute-1.amazonaws.com:5432/dkgb8euqaflh"
+database = SQLAlchemy(app)
+
+class users(database.Model):
+    __tablename__ = "users"
+    id = database.Column(database.Integer, primary_key = True)
+    username = database.Column(database.Text, unique=True, nullable=False)
+    hash = database.Column(database.Text, nullable=False)
+
+    def __repr__(self):
+        return "<users %r>" % self.username
+
+
+class schedule(database.Model):
+    __tablename__ = "schedule"
+    username = database.Column(database.Text, nullable=False, primary_key = True)
+    day = database.Column(database.Text, nullable=False, primary_key = True)
+    time = database.Column(database.Text, nullable=False, primary_key = True)
+    hometeam = database.Column(database.Text, nullable=False, primary_key = True)
+    awayteam = database.Column(database.Text, nullable=False, primary_key = True)
+    table1 = database.Column(database.Text)
+    team_table1 = database.Column(database.Text)
+    table2 = database.Column(database.Text)
+    team_table2 = database.Column(database.Text)
+    table3 = database.Column(database.Text)
+    team_table3 = database.Column(database.Text)
+    zaalco = database.Column(database.Text)
+    team_zaalco = database.Column(database.Text)
+    referee1 = database.Column(database.Text)
+    team_referee1 = database.Column(database.Text)
+    referee2 = database.Column(database.Text)
+    team_referee2 = database.Column(database.Text)
+
+
+database.create_all()
 
 
 @app.after_request
@@ -40,8 +70,6 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-conn = sqlite3.connect("project.db")
 
 @app.route("/change", methods=["GET", "POST"])
 @login_required
@@ -52,11 +80,11 @@ def change():
 
         # Retrieve the sql tables from the current user
         df_schedule = DutyTable("sql")
-
+        
         output = BytesIO()
         writer = pd.ExcelWriter(output, engine='xlsxwriter')
         df_schedule.df_duty_table.to_excel(writer, sheet_name="schedule", index=False)
-        writer.close()
+        writer.save()
         output.seek(0)
         
         return send_file(output, as_attachment=True, attachment_filename='schedule.xlsx')
@@ -71,20 +99,24 @@ def change():
         # prepares the new duty table
         df_schedule_updated = pd.read_excel(file, sheet_name=0) # turn the excel sheet into pandas dataframe
         df_schedule_updated = df_schedule_updated.dropna(how = "all").reset_index().drop(columns = "index") # delete empty rows
-        df_schedule_updated["username"] = username[0] # make sure username = current username
+        df_schedule_updated["username"] = username # make sure username = current username
+
+        # Deletes former schedule
+        schedule.query.filter_by(username=username).delete()
+        database.session.commit()
 
         # deletes former schedule
-        db = conn.cursor()
-        db.execute("DELETE FROM schedule WHERE username=:username", {"username": username[0]})
+        #db = conn.cursor()
+        #db.execute("DELETE FROM schedule WHERE username=:username", {"username": username[0]})
             
         # adds current updated schedule
-        df_schedule_updated.to_sql("schedule", conn, if_exists='append', index=False)
-        db.close()
+        df_schedule_updated.to_sql("schedule", database.session.bind, if_exists='append', index=False)
 
         return redirect("/", code=302)
 
     else:
-        return render_template("change.html")   
+        return render_template("change.html")     
+
 
 @app.route("/download")
 @login_required
@@ -100,25 +132,26 @@ def download():
     # write to an excel file
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    
+
     df_players.to_excel(writer, sheet_name="players", index=False)
     df_teams.to_excel(writer, sheet_name="teams", index=False)
-
+    
     writer.close()
     output.seek(0)
-    
+
     return send_file(output, as_attachment=True, attachment_filename='duties.xlsx')
 
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    
+
     username = get_username()
-    db = conn.cursor()
-    c_2 = db.execute("SELECT day FROM schedule where username=:username GROUP BY day", {"username": username[0]})
-    weeks = c_2.fetchall()
-    db.close()
+    c_2 = schedule.query.filter_by(username=username).group_by(schedule.day).all()
+    weeks = []
+    for week in c_2:
+        weeks.append(week.day)
+
     data = [[]]
     new_ls = ["t06"]
 
@@ -128,30 +161,28 @@ def index():
         if not request.form.get("weeks"):
             return abort(400, "must select week")
 
-        db = conn.cursor()
-        c = db.execute("""SELECT day, time, hometeam, awayteam, table1, table2, table3,
-                        zaalco, referee1, referee2 FROM schedule WHERE
-                       day=:day AND username=:username""", {"day": request.form.get("weeks"), "username": username[0]})
-        data = c.fetchall()
-        db.close()
+        data = schedule.query.filter_by(username=username, day=request.form.get("weeks")).all()
 
         # Formatting the zaalco duty data
         zaalcos = []
         for game in data:
-            if game[7] == None:
+            if game.zaalco == None:
                 zaalcos.append("")
             else:
-                zaalcos.append(game[7])
+                zaalcos.append(game.zaalco)
 
         # Formatting the table duty data
         tables = []
         for game in data:
             table_string = ""
-            for i in range(4,7):
-                if game[i] != None:
-                    table_string = table_string + game[i] + ", "
+            if game.table1 != None:
+                table_string = table_string + game.table1
+            if game.table2 != None:
+                table_string = table_string + ", " + game.table2
+            if game.table3 != None:
+                table_string = table_string + ", " + game.table3
                 
-            table_sting = table_string.replace(", , ", ", ")
+            table_string = table_string.replace(", , ", ", ")
             if table_string[-2:] == ", ":
                 table_string = table_string[:-2]
             if table_string[:2] == ", ":
@@ -162,9 +193,11 @@ def index():
         referees = []
         for game in data:
             referee_string = ""
-            for i in range(8,10):
-                if game[i] != None:
-                    referee_string = referee_string + game[i] + ", "
+            if game.referee1 != None:
+                referee_string = referee_string + game.referee1
+            if game.referee2 != None:
+                referee_string = referee_string + ", " + game.referee2
+
             if referee_string[-2:] == ", ":
                 referee_string = referee_string[:-2]
             if referee_string[:2] == ", ":
@@ -174,7 +207,7 @@ def index():
         # Getting the right css id
         a = 6
         for i in range(len(data) - 1):
-            if data[i + 1][1] == data[i][1]:
+            if data[i + 1].time == data[i].time:
                 b = "t0" + str(a)
                 new_ls.append(b)
             else:
@@ -209,19 +242,16 @@ def login():
             flash("Missing Password")
             return redirect("/login")
 
-        db = conn.cursor()
         # Query database for username
-        c = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")})
-        rows = c.fetchone()
-        db.close()
+        rows = users.query.filter_by(username=request.form.get("username")).first()
 
         # Ensure username exists and password is correct
-        if len(rows) != 3 or not check_password_hash(rows[2], request.form.get("password")):
+        if not check_password_hash(rows.hash, request.form.get("password")):
             flash("Username or password is incorrect")
             return redirect("/login")
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]
+        session["user_id"] = rows.id
 
         # Redirect user to home page
         return redirect("/")
@@ -314,24 +344,18 @@ def register():
         # Makes an hash out of the password
         hash = generate_password_hash(request.form.get("password"))
 
-        db = conn.cursor()
-        # Insert user into users table and ensure the username doesn't exist already
-        result = db.execute("INSERT INTO users(username, hash) VALUES(:username, :hash)",
-                            {"username": request.form.get("username"), "hash": hash})
-        if not result:
-            return abort(400, "username already exists")
+        #insert user into users table
+        new_user = users(username=request.form.get("username"), hash=hash)
+        database.session.add(new_user)
 
         # Save SQL table
-        conn.commit()
+        database.session.commit()
 
         # Query database for username
-        c = db.execute("SELECT * FROM users WHERE username = :username",
-                       {"username": request.form.get("username")})
+        c = users.query.filter_by(username=request.form.get("username")).first()
 
-        rows = c.fetchone()
-        db.close()
         # Remember which user has logged in
-        session["user_id"] = rows[0]
+        session["user_id"] = c.id
 
         # Redirect user to home page
         return redirect("/")
