@@ -1,5 +1,6 @@
 from flask import redirect, session, abort, flash, Flask
 from functools import wraps, reduce
+from application import app
 import operator
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
@@ -9,7 +10,7 @@ import pandas as pd
 #sqlite3.register_adapter(np.int64, lambda val: int(val))
 #sqlite3.register_adapter(np.int32, lambda val: int(val))
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 # connect SQLite to project.db
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b06747de32826f75925a2edb7406b343fcdedd774bb04aec262adf5c@ec2-23-21-165-188.compute-1.amazonaws.com:5432/dkgb8euqaflh"
