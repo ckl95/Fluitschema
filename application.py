@@ -119,6 +119,9 @@ def download():
 def index():
 
     username = get_username()
+    print(username)
+    print("cowabunga")
+    print(schedule.day)
     try:
         c_2 = schedule.query.filter_by(username=username).group_by(schedule.days).all()
     except:
