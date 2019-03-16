@@ -8,8 +8,8 @@
     <form action="/" method="post">
         <select name="weeks">
             {% for day in weeks %}
-                <option value= {{day[0]}}>
-                    {{day[0]}}
+                <option value= {{day}}>
+                    {{day}}
                 </option>
             {% endfor %}
         </select>
@@ -17,7 +17,7 @@
     </form>
     
 <br />
-    {{data[0][0]}}
+    {{data[0].day}}
 
     <table style="width: 640px">
         <tr id="t03">
@@ -29,8 +29,8 @@
         </tr>
         {% for i in range(length) %}
             <tr id={{new_ls[i]}}>
-                    <td id="t01">{{data[i][1]}}</td>
-                    <td id="t04">{{data[i][2]}} - {{data[i][3]}}</td>
+                    <td id="t01">{{data[i].time}}</td>
+                    <td id="t04">{{data[i].hometeam}} - {{data[i].awayteam}}</td>
                     <td id="t05">{{tables[i]}}</td>
                     <td id="t05">{{zaalcos[i]}}</td>
                     <td id="t05">{{referees[i]}}</td>

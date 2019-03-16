@@ -246,7 +246,9 @@ def login():
         rows = users.query.filter_by(username=request.form.get("username")).first()
 
         # Ensure username exists and password is correct
-        if not check_password_hash(rows.hash, request.form.get("password")):
+        Try:
+            check_password_hash(rows.hash, request.form.get("password"))
+        Except AttributeError:
             flash("Username or password is incorrect")
             return redirect("/login")
 
