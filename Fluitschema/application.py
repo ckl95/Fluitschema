@@ -149,7 +149,7 @@ def index():
     username = get_username()
     try:
         c_2 = schedule.query.filter_by(username=username).group_by(schedule.days).all()
-    except psycopg2.ProgrammingError:
+    except ProgrammingError:
         c_2 = []
     weeks = []
     for week in c_2:
