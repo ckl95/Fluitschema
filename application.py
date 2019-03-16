@@ -122,6 +122,7 @@ def index():
     try:
         c_2 = schedule.query.filter_by(username=username).group_by(schedule.days).all()
     except:
+        print("{}{}{}{}{}{}{}there has been an error[][][[][][]")
         c_2 = []
     weeks = []
     for week in c_2:
