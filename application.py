@@ -3,7 +3,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
-from Fluitschema.helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
+from helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
 import os, sys
 import psycopg2
 import numpy as np
