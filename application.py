@@ -123,7 +123,7 @@ def index():
     print("cowabunga")
     print(schedule.days)
     #try:
-    c_2 = schedule.query.filter_by(username=username).group_by("{}".format(username), schedule.days).all()
+    c_2 = schedule.query.filter_by(username=username).group_by(schedule.username, schedule.days).all()
     #except:
     #    print("{}{}{}{}{}{}{}there has been an error[][][[][][]")
     #    c_2 = []
