@@ -1,11 +1,12 @@
 from flask import redirect, session, abort, flash, Flask
 from functools import wraps, reduce
-from application import database
 import operator
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
 import numpy as np
 import pandas as pd
+
+from database import database
 from models import users, schedule
 
 def login_required(f):
