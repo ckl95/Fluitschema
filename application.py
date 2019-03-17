@@ -3,7 +3,6 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
-#from helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
 import os, sys
 import psycopg2
 import numpy as np
@@ -120,13 +119,7 @@ def index():
 
     username = get_username()
     print(username)
-    print("cowabunga")
-    print(schedule.days)
-    #try:
     c_2 = schedule.query.filter_by(username=username).group_by(schedule.username, schedule.days, schedule.times, schedule.hometeam, schedule.awayteam).all()
-    #except:
-    #    print("{}{}{}{}{}{}{}there has been an error[][][[][][]")
-    #    c_2 = []
     weeks = []
     for week in c_2:
         if week.days not in weeks:
