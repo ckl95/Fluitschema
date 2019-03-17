@@ -131,9 +131,7 @@ def index():
     weeks = []
     for week in c_2:
         if week not in weeks:
-            day = datetime.strptime(week.days, "%d-%m-%Y")
-            day = day.strftime("%Y-%m-%d")
-            weeks.append(day)
+            weeks.append(week.days)
 
     weeks.sort()
     
