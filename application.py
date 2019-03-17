@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from io import BytesIO
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 # The flask application pacakage
 
@@ -129,8 +130,13 @@ def index():
     #    c_2 = []
     weeks = []
     for week in c_2:
-        weeks.append(week.days)
+        if week not in weeks:
+            day = datetime.strptime(week.days, "%d-%m-%Y")
+            day = day.strftime("%Y-%m-%d")
+            weeks.append(day)
 
+    weeks.sort()
+    
     data = [[]]
     new_ls = ["t06"]
 
