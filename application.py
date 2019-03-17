@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from io import BytesIO
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 # The flask application pacakage
 
@@ -130,7 +129,7 @@ def index():
     #    c_2 = []
     weeks = []
     for week in c_2:
-        if week not in weeks:
+        if week.days not in weeks:
             weeks.append(week.days)
 
     weeks.sort()
