@@ -12,7 +12,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from database import app, database
 
-
 from models import users, schedule
 
 database.create_all()

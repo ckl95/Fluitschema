@@ -1,7 +1,6 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from waitress import serve
 from os import environ
+
 
 # The flask application pacakage
 
@@ -14,3 +13,5 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://cmqnzhslytdnff:96d89452b0674
 database = SQLAlchemy(app)
 
 serve(app, host="0.0.0.0", port=environ.get("PORT", 5000))
+
+import application
