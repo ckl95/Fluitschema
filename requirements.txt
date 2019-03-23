@@ -8,4 +8,5 @@ psycopg2
 xlrd
 XlsxWriter
 waitress
-Werkzeug
+werkzeug
+uwsgi
