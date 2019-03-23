@@ -3,14 +3,18 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
-import os, sys
+import sys
+from os import environ
 import psycopg2
 import numpy as np
 import pandas as pd
 from io import BytesIO
 from flask_sqlalchemy import SQLAlchemy
+from waitress import serve
 
 from database import app, database
+
+serve(app, host="0.0.0.0", port=environ.get("PORT", 5000))
 
 from models import users, schedule
 
