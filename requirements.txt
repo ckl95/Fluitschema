@@ -1,12 +1,10 @@
 Flask
 Flask-Session
 Flask-SQLAlchemy
-gunicorn
 numpy
 pandas
 psycopg2
 xlrd
 XlsxWriter
-waitress
 werkzeug
 uwsgi

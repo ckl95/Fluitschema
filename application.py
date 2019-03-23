@@ -10,21 +10,12 @@ import numpy as np
 import pandas as pd
 from io import BytesIO
 from flask_sqlalchemy import SQLAlchemy
-#from waitress import serve
-
 from database import app, database
-
-#serve(app, host="0.0.0.0", port=environ.get("PORT", 5000))
-
 from models import users, schedule
 
 database.create_all()
 
 from helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
-
-
-
-
 
 @app.after_request
 # Ensure responses aren't cached
