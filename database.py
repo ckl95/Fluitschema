@@ -1,5 +1,5 @@
 from flask import Flask
-from flask-sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from waitress import serve
 from os import environ
 
