@@ -1,6 +1,7 @@
 Flask
 Flask-Session
 Flask-SQLAlchemy
+gunicorn
 numpy
 pandas
 psycopg2
