@@ -10,11 +10,11 @@ import numpy as np
 import pandas as pd
 from io import BytesIO
 from flask_sqlalchemy import SQLAlchemy
-from waitress import serve
+#from waitress import serve
 
 from database import app, database
 
-serve(app, host="0.0.0.0", port=environ.get("PORT", 5000))
+#serve(app, host="0.0.0.0", port=environ.get("PORT", 5000))
 
 from models import users, schedule
 
