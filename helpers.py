@@ -192,6 +192,7 @@ class TeamsTable:
 
         return df_teams
 
+
     def __objectify(self):
         """ Turn the names of the teams dataframe into objects"""
 

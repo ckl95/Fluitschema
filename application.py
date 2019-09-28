@@ -335,22 +335,3 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
-
-
-@app.route("/test")
-def test():
-    """Just testing"""
-
-    username = get_username()
-
-    df_schedule = pd.read_sql("""SELECT username, days, times, hometeam, awayteam, table1, team_table1, table2, team_table2, table3, team_table3,
-                            zaalco, team_zaalco, referee1, team_referee1, referee2, team_referee2 FROM
-                         schedule WHERE username = :username""",
-                          conn, params={"username": username[0]})
-
-
-    df2 = df_schedule[df_schedule["days"] == "2018-11-24"]
-    print(df2)
-    print(df_schedule.isin(["Jorn Froen"]).any(axis=None))
-
-    return redirect("/", code=302)
