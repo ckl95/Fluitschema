@@ -3,7 +3,7 @@ Flask-Session
 Flask-SQLAlchemy
 numpy
 pandas
-psycopg2
+psycopg2-binary
 xlrd
 XlsxWriter
 werkzeug

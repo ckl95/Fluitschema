@@ -5,7 +5,7 @@ from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 import sys
 from os import environ
-#import psycopg2
+import psycopg2-binary
 import numpy as np
 import pandas as pd
 from io import BytesIO
