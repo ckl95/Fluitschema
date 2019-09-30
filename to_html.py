@@ -11,17 +11,17 @@ def to_html_file_writer(df, f):
 
 
     # html of the date
-    f.write(b"""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\n""".format(df.columns[0].strftime("%d %B")))
+    f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\n""".format(df.columns[0].strftime("%d %B")).encode("utf-8"))
 
     # html of the headers
-    f.write(b"""<table class="tg">
+    f.write("""<table class="tg">
     <tr>
         <th class="tg-time">Time</th>
         <th class="tg-game">Game</th>
         <th class="tg-tacmre">Table Duty</th>
         <th class="tg-tacmre">Court Manager</th>
         <th class="tg-tacmre">Referees</th>
-    </tr>\n""")
+    </tr>\n""".encode("utf-8"))
 
     # html of the body; filled in per row
     background_color = "tg-white_row"
@@ -48,7 +48,7 @@ def to_html_file_writer(df, f):
             ref = "Bond"
 
         ## html of the row
-        f.write(b"""  <tr class="{6}">
+        f.write("""  <tr class="{6}">
         <td>{0}</td>
         <td>{1} - {2}</td>
         <td>{3}</td>
@@ -61,7 +61,7 @@ def to_html_file_writer(df, f):
             table,
             df.iloc[i,6],
             ref,
-            background_color))
+            background_color).encode("utf-8"))
 
-    f.write(b"</table>")
+    f.write("</table>".encode("utf-8"))
     return f
