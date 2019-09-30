@@ -353,7 +353,7 @@ def to_html():
 
         # Create new file
         output = io.StringIO()
-        to_html_file_writer(df_schedule, output)
+        output = to_html_file_writer(df_schedule, output)
         return send_file(output, as_attachment=True, attachment_filename='new.txt')
 
     else:
