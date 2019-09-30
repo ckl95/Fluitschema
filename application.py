@@ -12,10 +12,12 @@ from io import BytesIO
 from flask_sqlalchemy import SQLAlchemy
 from database import app, database
 from models import users, schedule
+import io
 
 database.create_all()
 
 from helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
+from to_html import to_html_file_writer
 
 @app.after_request
 # Ensure responses aren't cached
@@ -335,3 +337,26 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
+
+@app.route("/to_html", methods=["GET", "POST"])
+def to_html():
+    if request.method == "POST":
+    
+        # if file is missing
+        if 'excel_file' not in request.files:
+            abort(400, "Missing File")
+        file = request.files["excel_file"]
+
+        # Opens the excel table and formats it
+        df_schedule = pd.read_excel(file)
+        df_schedule = df_schedule.fillna('')
+
+        # Create new file
+        output = io.StringIO()
+        to_html_file_writer(df_schedule, output)
+        return send_file(output, as_attachment=True, attachment_filename='new.txt')
+
+    else:
+        return render_template("to_html.html")
+
+
