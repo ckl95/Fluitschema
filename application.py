@@ -354,6 +354,7 @@ def to_html():
         # Create new file
         output = io.StringIO()
         output = to_html_file_writer(df_schedule, output)
+        output.seek(0)
         return send_file(output, as_attachment=True, attachment_filename='new.txt')
 
     else:
