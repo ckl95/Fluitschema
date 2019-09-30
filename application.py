@@ -8,11 +8,10 @@ from os import environ
 import psycopg2
 import numpy as np
 import pandas as pd
-from io import BytesIO
+from io import BytesIO, StringIO
 from flask_sqlalchemy import SQLAlchemy
 from database import app, database
 from models import users, schedule
-import io
 
 database.create_all()
 
@@ -352,10 +351,10 @@ def to_html():
         df_schedule = df_schedule.fillna('')
 
         # Create new file
-        output = io.StringIO()
+        output = StringIO()
         output = to_html_file_writer(df_schedule, output)
         output.seek(0)
-        return send_file(output, as_attachment=True, attachment_filename='new.txt')
+        return send_file(output.getvalue(), as_attachment=True, attachment_filename='new.txt')
 
     else:
         return render_template("to_html.html")
