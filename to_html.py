@@ -11,7 +11,7 @@ def to_html_file_writer(df, f):
 
 
     # html of the date
-    f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\r\n""".format(df.columns[0].strftime("%d %B")))
+    f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\r\n""".format(df.columns[0].strftime("%d %B")).encode("utf-8"))
 
     # html of the headers
     f.write("""<table class="tg">\r\n
@@ -21,7 +21,7 @@ def to_html_file_writer(df, f):
         <th class="tg-tacmre">Table Duty</th>\r\n
         <th class="tg-tacmre">Court Manager</th>\r\n
         <th class="tg-tacmre">Referees</th>\r\n
-    </tr>\r\n""")
+    </tr>\r\n""".encode("utf-8"))
 
     # html of the body; filled in per row
     background_color = "tg-white_row"
@@ -61,6 +61,6 @@ def to_html_file_writer(df, f):
             table,
             df.iloc[i,6],
             ref,
-            background_color))
+            background_color).encode("utf-8"))
 
-    f.write("</table>")
+    f.write("</table>".encode("utf-8"))

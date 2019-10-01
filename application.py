@@ -351,10 +351,11 @@ def to_html():
         df_schedule = df_schedule.fillna('')
 
         # Create new file
-        f = open("new.txt", "w", encoding="utf-8")
-        to_html_file_writer(df_schedule, f)
-        f.close()
-        return send_file("new.txt", as_attachment=True, attachment_filename='new.txt')
+        #f = open("new.txt", "w", encoding="utf-8")
+        output = BytesIO()
+        to_html_file_writer(df_schedule, output)
+        output.seek(0)
+        return send_file(output, as_attachment=True, attachment_filename='new.txt')
 
     else:
         return render_template("to_html.html")
