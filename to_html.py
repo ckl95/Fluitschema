@@ -11,7 +11,7 @@ def to_html_file_writer(df, f):
 
 
     # html of the date
-    f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\n""".format(df.columns[0].strftime("%d %B")))
+    f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\r\n""".format(df.columns[0].strftime("%d %B")))
 
     # html of the headers
     f.write("""<table class="tg">
