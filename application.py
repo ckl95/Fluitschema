@@ -352,7 +352,7 @@ def to_html():
 
         # Create new file
         f = open("new.txt", "w", encoding="utf-8")
-        output = to_html_file_writer(df_schedule, output)
+        to_html_file_writer(df_schedule, f)
         f.close()
         return send_file("new.txt", as_attachment=True, attachment_filename='new.txt')
 

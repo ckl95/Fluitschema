@@ -64,4 +64,3 @@ def to_html_file_writer(df, f):
             background_color))
 
     f.write("</table>")
-    return f
