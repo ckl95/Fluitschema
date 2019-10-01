@@ -14,14 +14,15 @@ def to_html_file_writer(df, f):
     f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>\r\n""".format(df.columns[0].strftime("%d %B")).encode("utf-8"))
 
     # html of the headers
-    f.write("""<table class="tg">\r\n
-    <tr>\r\n
-        <th class="tg-time">Time</th>\r\n
-        <th class="tg-game">Game</th>\r\n
-        <th class="tg-tacmre">Table Duty</th>\r\n
-        <th class="tg-tacmre">Court Manager</th>\r\n
-        <th class="tg-tacmre">Referees</th>\r\n
-    </tr>\r\n""".encode("utf-8"))
+    f.write("""
+<table class="tg">\r\n
+  <tr>\r\n
+    <th class="tg-time">Time</th>\r\n
+    <th class="tg-game">Game</th>\r\n
+    <th class="tg-tacmre">Table Duty</th>\r\n
+    <th class="tg-tacmre">Court Manager</th>\r\n
+    <th class="tg-tacmre">Referees</th>\r\n
+  </tr>\r\n""".encode("utf-8"))
 
     # html of the body; filled in per row
     background_color = "tg-white_row"
@@ -48,13 +49,14 @@ def to_html_file_writer(df, f):
             ref = "Bond"
 
         ## html of the row
-        f.write("""  <tr class="{6}">\r\n
-        <td>{0}</td>\r\n
-        <td>{1} - {2}</td>\r\n
-        <td>{3}</td>\r\n
-        <td>{4}</td>\r\n
-        <td>{5}</td>\r\n
-    </tr>\r\n""".format(
+        f.write("""
+  <tr class="{6}">\r\n
+    <td>{0}</td>\r\n
+    <td>{1} - {2}</td>\r\n
+    <td>{3}</td>\r\n
+    <td>{4}</td>\r\n
+    <td>{5}</td>\r\n
+  </tr>\r\n""".format(
             "{:.2f}".format(df.iloc[i,7]),
             df.iloc[i,8],
             df.iloc[i,9],
