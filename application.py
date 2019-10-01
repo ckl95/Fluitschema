@@ -359,7 +359,7 @@ def to_html():
 
     elif request.method == "POST" and "example" in request.form:
 
-        send_file("5-okt.xlsx", as_attachment=True, attachment_filename="example_file.xlsx")
+        return send_file("5-okt.xlsx", as_attachment=True, attachment_filename="example_file.xlsx")
 
     else:
         return render_template("to_html.html")

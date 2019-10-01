@@ -5,13 +5,12 @@
 {% endblock %}
 
 {% block main %}
-<body background-color:red>
+<body style="background-color:#ffcccc">
     <form action="/to_html" method="post" enctype="multipart/form-data">
         <b>Upload the excel file</b>
         <div>
             <input type="file" id="file" name="excel_file" value="excel_file">
         </div>
-        <br />
         <br />
         <button class="btn btn-primary" type="submit">to html! </button>
         <br />
