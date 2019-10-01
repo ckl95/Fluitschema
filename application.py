@@ -339,7 +339,7 @@ def register():
 
 @app.route("/to_html", methods=["GET", "POST"])
 def to_html():
-    if request.method == "POST":
+    if request.method == "POST" and "excel_file" in request.form:
     
         # if file is missing
         if 'excel_file' not in request.files:
@@ -356,6 +356,10 @@ def to_html():
         to_html_file_writer(df_schedule, output)
         output.seek(0)
         return send_file(output, as_attachment=True, attachment_filename='new.txt')
+
+    elif request.method == "POST" and "example" in request.form:
+
+        send_file("5-okt.xlsx", as_attachment=True, attachment_filename="example_file.xlsx")
 
     else:
         return render_template("to_html.html")
