@@ -102,7 +102,7 @@ def to_html_file_writer(df, f):
         ## Table duty formatting
         table = df.iloc[i,3] + ", " + df.iloc[i,4]
         ### Is there a third table duty person assigned?
-        if df.iloc[i,5] == "":
+        if df.iloc[i,5] != "":
             table = table + ", " + df.iloc[i,5]
 
         ## ref formatting
