@@ -17,8 +17,8 @@ def to_html_file_writer(df, f):
     f.write("""
 <table class="tg">\r\n
   <tr>\r\n
-    <th class="tg-time">Time</th>\r\n
-    <th class="tg-game">Game</th>\r\n
+    <th class="tg-time">Time</th>\n
+    <th class="tg-game">Game</th>
     <th class="tg-tacmre">Table Duty</th>\r\n
     <th class="tg-tacmre">Court Manager</th>\r\n
     <th class="tg-tacmre">Referees</th>\r\n
