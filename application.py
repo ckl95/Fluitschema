@@ -16,7 +16,7 @@ from models import users, schedule
 database.create_all()
 
 from helpers import login_required, create_duty_amounts, get_username, DutyTable, TeamsTable, GameSchedule
-from to_html import to_html_file_writer
+from to_html import to_html_file_writer, format_file
 
 @app.after_request
 # Ensure responses aren't cached
@@ -339,6 +339,8 @@ def register():
 
 @app.route("/to_html", methods=["GET", "POST"])
 def to_html():
+    """ Creates an HTML table out of an excel file"""
+
     if request.method == "POST" and "excel_file" in request.form:
     
         # if file is missing
@@ -348,10 +350,9 @@ def to_html():
 
         # Opens the excel table and formats it
         df_schedule = pd.read_excel(file)
-        df_schedule = df_schedule.fillna('')
+        df_schedule = format_file(df_schedule)
 
         # Create new file
-        #f = open("new.txt", "w", encoding="utf-8")
         output = BytesIO()
         to_html_file_writer(df_schedule, output)
         output.seek(0)
