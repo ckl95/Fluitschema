@@ -58,6 +58,8 @@ def format_file(df):
     if type(df.columns[0]) == pd._libs.tslibs.timestamps.Timestamp or type(df.columns[0]) == datetime.datetime:
         df.iloc[0,0] = df.columns[0]   
 
+    df = df.reset_index(drop=True)
+
     # Turns all the time data types into datetime.time
     df.iloc[:,7] = df.iloc[:,7].astype(str)
     for index, row in df.iterrows():
