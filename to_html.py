@@ -61,7 +61,13 @@ def format_file(df):
     df = df.reset_index(drop=True)
 
     # Turns all the time data types into datetime.time
+    ## 1. Turns everything first into a string
     df.iloc[:,7] = df.iloc[:,7].astype(str)
+    for index, row in df.iterrows():
+        if df.iloc[index,7][-2] == ".":
+            df.iloc[index,7] = df.iloc[index,7] + "0"
+
+    ## 2. Then, turns the string into datetime.time
     for index, row in df.iterrows():
         try:
             df.iloc[index,7] = datetime.datetime.strptime(df.iloc[index,7], '%H.%M').time()
