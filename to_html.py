@@ -64,6 +64,7 @@ def format_file(df):
     ## 1. Turns everything first into a string
     df.iloc[:,7] = df.iloc[:,7].astype(str)
     for index, row in df.iterrows():
+        # Prevents 19.3 becoming 19.03
         if df.iloc[index,7][-2] == ".":
             df.iloc[index,7] = df.iloc[index,7] + "0"
 
