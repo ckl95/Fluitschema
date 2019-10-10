@@ -30,6 +30,13 @@ def to_html_file_writer(df, f):
                 background_color = "tg-white_row"
                 _insert_headers(df, f, i)
 
+
+        ## Time formatting 
+        try:
+            time = df.iloc[i,7].strftime("%H.%M")
+        except AttributeError:
+            time = ""
+
         ## Table duty formatting
         table = df.iloc[i,3] + ", " + df.iloc[i,4]
         ### Is there a third table duty person assigned?
@@ -50,7 +57,7 @@ def to_html_file_writer(df, f):
     <td>{4}</td>
     <td>{5}</td>
   </tr>""".format(
-            df.iloc[i,7].strftime("%H.%M"),
+            time,
             df.iloc[i,8],
             df.iloc[i,9],
             table,
@@ -89,61 +96,16 @@ def format_file(df):
     # Delete empty columns and rows
     df = df.dropna(how='all', axis=1) # Columns
     df = df.dropna(how='all', axis=0) # Rows
+    df = df.reset_index(drop=True)
 
-    # Add an empty 'date' column if no dates have been given on the first row or column.
+
+    # Add an empty 'Date' column if no dates have been given on the first row or column. To match the required format.
     bool_1 = df[df.iloc[:,0].apply(lambda x: type(x) == datetime.datetime)].empty
     bool_2 = df[df.iloc[:,0].apply(lambda x: type(x) == pd._libs.tslibs.timestamps.Timestamp)].empty
     bool_3 = (type(df.columns[0]) != pd._libs.tslibs.timestamps.Timestamp and type(df.columns[0]) != datetime.datetime)
     if bool_1 and bool_2 and bool_3:
         df.insert(0,"Date","")
 
-    # Delete unneccesary rows
-    for index, row in df.iterrows():
-        ## Rows not containing a time and a hometeam are deleted 
-        if (type(row[0]) != pd._libs.tslibs.timestamps.Timestamp and type(row[0]) != datetime.datetime) and pd.isna(row[8]) == True:
-            df = df.drop(index)
-    df = df.reset_index(drop=True)
-
-    # If no headers have been given in xlsx sheet, pandas headers should probably be the first row.
-    if df.columns[7][0] == "1":
-        df.index = df.index + 1
-        df.loc[0] = df.columns.tolist()
-        df = df.sort_index()
-
-    # If pandas headers are an empty row and the xlsx sheet headers are on first row: making the first row the headers
-    ## If date is in the headers, but the table duty header isn't.
-    if df.columns[4] == "Unnamed: 4" and (type(df.columns[0]) == pd._libs.tslibs.timestamps.Timestamp or type(df.columns[0]) == datetime.datetime):
-        temp = df.columns[0]
-
-    ## If no table duty header is present
-    if df.columns[4] == "Unnamed: 4":
-        df.columns = df.iloc[0,:].tolist()
-        df = df.drop(0)
-        df = df.reset_index(drop=True)
-        try:
-            df = df.rename(columns={df.columns[0]:temp})
-        except NameError:
-            pass
-        df = df.reset_index(drop=True)
-
-    # Make sure the dates are on the first row of every day
-    for index, row in df.iterrows():
-        if (type(row[0]) == pd._libs.tslibs.timestamps.Timestamp or type(row[0]) == datetime.datetime) and pd.isna(row[7]) == True:
-            df.iloc[index+1,0] = row[0]
-            df.iloc[index,0] = np.nan
-
-    # Delete any more unneccesary rows
-    for index, row in df.iterrows():
-        ## Rows not containing a time and a hometeam are deleted 
-        if (type(row[0]) != pd._libs.tslibs.timestamps.Timestamp and type(row[0]) != datetime.datetime) and pd.isna(row[8]) == True:
-            df = df.drop(index)
-
-    # The first day gets the name of the column if the column is a date
-    if type(df.columns[0]) == pd._libs.tslibs.timestamps.Timestamp or type(df.columns[0]) == datetime.datetime:
-        df.iloc[0,0] = df.columns[0]
-
-
-    df = df.reset_index(drop=True)
 
     # Turns all the time data types into datetime.time
     ## 1. Turns everything first into a string
@@ -154,6 +116,7 @@ def format_file(df):
             df.iloc[index,7] = df.iloc[index,7] + "0"
 
     ## 2. Then, turns the string into datetime.time
+    ls = []
     for index, row in df.iterrows():
         try:
             df.iloc[index,7] = datetime.datetime.strptime(df.iloc[index,7], '%H.%M').time()
@@ -161,10 +124,47 @@ def format_file(df):
             try:
                 df.iloc[index,7] = datetime.datetime.strptime(df.iloc[index,7], '%H:%M:%S').time()
             except ValueError:
-                print("Error")
-                exit
+                # Delete headers
+                bool_4 = type(df.iloc[index,7]) == str and df.iloc[index,7] != "nan" and df.iloc[index,7] != " " and df.iloc[index,7] != "\\r\\n"
+                bool_5 = type(row[0]) != pd._libs.tslibs.timestamps.Timestamp and type(row[0]) != datetime.datetime
+                if bool_4 and bool_5:
+                    ls.append(index)
+                else:
+                    df.iloc[index,7] = ""
+    ## 3. Drops the selected rows containing headers
+    for i in ls:
+        df = df.drop(i)
+    df = df.reset_index(drop=True)
+
+
+    # If no headers have been given in xlsx sheet, pandas headers should probably be the first row.
+    if df.columns[7][0] == "1" or df.columns[7][0] == "2" or df.columns[7] == "Unnamed: 7":
+        df.index = df.index + 1
+        df.loc[0] = df.columns.tolist()
+        df = df.sort_index()
+
+
+    # Make sure the dates are on the first row of every day
+    for index, row in df.iterrows():
+        if (type(row[0]) == pd._libs.tslibs.timestamps.Timestamp or type(row[0]) == datetime.datetime) and pd.isna(row[7]) == True:
+            df.iloc[index+1,0] = row[0]
+            df.iloc[index,0] = np.nan
+    df = df.dropna(how='all', axis=0) # Rows
+    df = df.reset_index(drop=True)
+
+    ## The first day gets the name of the column if the column is a date
+    if type(df.columns[0]) == pd._libs.tslibs.timestamps.Timestamp or type(df.columns[0]) == datetime.datetime:
+        df.iloc[0,0] = df.columns[0]
+
+
+    # Delete rows with no hometeam and date
+    for index, row in df.iterrows():
+        if (type(row[0]) != pd._libs.tslibs.timestamps.Timestamp and type(row[0]) != datetime.datetime) and pd.isna(row[8]) == True:
+            df = df.drop(index)
+    df = df.reset_index(drop=True)
     
+
     # Turns NaN into empty strings
     df = df.fillna('')
-
+    df = df.replace(regex=r'^Unnamed:.*$', value="")
     return df
