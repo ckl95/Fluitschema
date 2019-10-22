@@ -40,7 +40,7 @@ def to_html_file_writer(df, f):
         ## Table duty formatting
         table = df.iloc[i,3] + ", " + df.iloc[i,4]
         ### Is there a third table duty person assigned?
-        if df.iloc[i,5] != "":
+        if df.iloc[i,5] != "" and df.iloc[i,5] != "nvt":
             table = table + ", " + df.iloc[i,5]
 
         ## ref formatting
@@ -72,7 +72,7 @@ def _insert_headers(df, f, i):
     # html of the date
     try:
         f.write("""<hr><b><font color = "Green">Tafelschema/Table duty {}</font></b>""".format(df.iloc[i, 0].strftime("%d %B")).encode("utf-8"))
-    # If the date is a string; no present
+    # If the date is a string aka no date present
     except AttributeError:
         f.write("""<hr><b><font color = "Green">Tafelschema/Table duty</font></b>""".encode("utf-8"))
 
