@@ -25,6 +25,7 @@ def to_html_file_writer(df, f):
                 elif background_color == "tg-green_row":
                     background_color = "tg-white_row"
 
+        ### If an new date is found, end current table and start a new one
         if type(df.iloc[i, 0]) == pd._libs.tslibs.timestamps.Timestamp and i != 0:
                 f.write("\n</table>\n".encode("utf-8"))
                 background_color = "tg-white_row"
@@ -45,7 +46,7 @@ def to_html_file_writer(df, f):
 
         ## ref formatting
         ref = df.iloc[i,1] + ", " + df.iloc[i,2]
-        if ref ==  "Bond, Bond" or ref == ", " or ref == "Bond, " or ref == "bond, bond" or ref == "bond, ":
+        if ref ==  "Bond, Bond" or ref == "Bond, " or ref == ", " or ref == "bond, bond" or ref == "bond, ":
             ref = "Bond"
 
         ## html of the row
@@ -87,24 +88,26 @@ def _insert_headers(df, f, i):
     <th class="tg-tacmre">Referees</th>
   </tr>""".encode("utf-8"))
 
-
-
 def format_file(df):
     """ Puts the newly created pandas dataframe into the right format
     for to_html_file_writer to work"""
+    
+    # Add an empty 'Date' column if no dates have been given on the first row or column. To match the required format.
+    bool_1 = df[df.iloc[:,0].apply(lambda x: type(x) == datetime.datetime)].empty # If first column does not contain an datetime.datetime format
+    bool_2 = df[df.iloc[:,0].apply(lambda x: type(x) == pd._libs.tslibs.timestamps.Timestamp)].empty # If first column does not contain an pd._lib.tslibs.timestamps.Timstamp format
+    bool_3 = (type(df.columns[0]) != pd._libs.tslibs.timestamps.Timestamp and type(df.columns[0]) != datetime.datetime) # If the first header cell is not some time format
+    
+    ## Make sure the date column doesn't get deleted by df.drop.columns
+    if bool_1 and bool_2 and not bool_3:
+        df.iloc[0,0] = "Date"
+
+    if bool_1 and bool_2 and bool_3:
+        df.insert(0,"Date","")
     
     # Delete empty columns and rows
     df = df.dropna(how='all', axis=1) # Columns
     df = df.dropna(how='all', axis=0) # Rows
     df = df.reset_index(drop=True)
-
-
-    # Add an empty 'Date' column if no dates have been given on the first row or column. To match the required format.
-    bool_1 = df[df.iloc[:,0].apply(lambda x: type(x) == datetime.datetime)].empty
-    bool_2 = df[df.iloc[:,0].apply(lambda x: type(x) == pd._libs.tslibs.timestamps.Timestamp)].empty
-    bool_3 = (type(df.columns[0]) != pd._libs.tslibs.timestamps.Timestamp and type(df.columns[0]) != datetime.datetime)
-    if bool_1 and bool_2 and bool_3:
-        df.insert(0,"Date","")
 
 
     # Turns all the time data types into datetime.time
@@ -138,7 +141,7 @@ def format_file(df):
 
 
     # If no headers have been given in xlsx sheet, pandas headers should probably be the first row.
-    if df.columns[7][0] == "1" or df.columns[7][0] == "2" or df.columns[7] == "Unnamed: 7":
+    if df.columns[7][0] == "1" or df.columns[7][0] == "2" and not df.columns[8] == "Unnamed: 8":
         df.index = df.index + 1
         df.loc[0] = df.columns.tolist()
         df = df.sort_index()
