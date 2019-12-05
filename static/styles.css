@@ -106,7 +106,7 @@ body
     background-color: Azure;
 }
 
-svg path
+svg
 {
-    fill: red;
+    fill: currentColor;
 }
