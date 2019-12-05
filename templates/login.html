@@ -15,7 +15,8 @@
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>
 	<p>
-		<img style="color:green;" class="svg" src={{ url_for('static', filename="camera.svg") }}>
+		<object type="image/svg+xml" class="svg" data={{ url_for('static', filename="camera.svg") }}>
+		</object>
 	</p>
 
 {% endblock %}
