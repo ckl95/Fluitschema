@@ -15,18 +15,7 @@
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>
 	<p>
-		<img src="/camera.svg">
+		<img style="color:green;" src={{ url_for('static', filename="camera.svg") }}>
 	</p>
-	<p>
-		<img src="/camerb.svg">
-	</p>
-	<p>
-		<img src="/bakker.png">
-	</p>
-	<p>
-		<img src={{ url_for('static', filename="camerc.svg") }}>
-	</p>
-	<p>
-		<img src="{{ mega_file }}" alt="iimmaaggee">
-	</p>
+
 {% endblock %}
