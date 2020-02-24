@@ -101,8 +101,9 @@ def format_file(df):
     if bool_1 and bool_2 and not bool_3:
         df.iloc[0,0] = "Date"
 
-    if bool_1 and bool_2 and bool_3:
-        df.insert(0,"Date","")
+    # Used to allow data sheets in which the first column is already referee. However did not work.
+    #if bool_1 and bool_2 and bool_3:
+    #    df.insert(0,"Date","")
     
     # Delete empty columns and rows
     df = df.dropna(how='all', axis=1) # Columns
