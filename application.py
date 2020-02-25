@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, session, abort, send_file, Flask
+from flask import flash, redirect, render_template, request, session, abort, send_file, Flask, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
@@ -26,6 +26,9 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+
+#PEOPLE_FOLDER = os.path.join('static', 'new_folder')
+#app.config["UPLOAD_FOLDER"] = PEOPLE_FOLDER
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -231,7 +234,8 @@ def login():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template("login.html")
+        #full_filename = os.path.join(app.config["UPLOAD_FOLDER"], 'camerd.svg')
+        return render_template("login.html")#, mega_file = full_filename)
 
 
 @app.route("/logout")

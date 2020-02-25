@@ -105,3 +105,8 @@ body
 {
     background-color: Azure;
 }
+
+svg
+{
+    fill: currentColor;
+}
